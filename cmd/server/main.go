@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"polyglot-shop/user-service/internal/server"
+	"nexuscart/user-service/internal/server"
 )
 
 func main() {

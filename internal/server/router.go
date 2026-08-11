@@ -2,12 +2,23 @@ package server
 
 import (
 	"net/http"
+	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
-	"polyglot-shop/user-service/internal/requestid"
-	"polyglot-shop/user-service/internal/user"
+	"nexuscart/user-service/internal/requestid"
+	"nexuscart/user-service/internal/user"
 )
+
+const defaultServiceVersion = "1.0.0"
+
+func serviceVersion() string {
+	if version := strings.TrimSpace(os.Getenv("APP_VERSION")); version != "" {
+		return version
+	}
+	return defaultServiceVersion
+}
 
 func New() *gin.Engine {
 	router := gin.New()
@@ -17,7 +28,11 @@ func New() *gin.Engine {
 	handler := user.NewHandler(repository)
 
 	router.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "UP", "service": "user-service"})
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "UP",
+			"service": "user-service",
+			"version": serviceVersion(),
+		})
 	})
 
 	v1 := router.Group("/api/v1")

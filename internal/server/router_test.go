@@ -9,6 +9,30 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func TestHealthIncludesServiceVersion(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	request := httptest.NewRequest(http.MethodGet, "/health", nil)
+	response := httptest.NewRecorder()
+
+	New().ServeHTTP(response, request)
+
+	if response.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", response.Code)
+	}
+
+	var body struct {
+		Status  string `json:"status"`
+		Service string `json:"service"`
+		Version string `json:"version"`
+	}
+	if err := json.Unmarshal(response.Body.Bytes(), &body); err != nil {
+		t.Fatalf("decode response: %v", err)
+	}
+	if body.Status != "UP" || body.Service != "user-service" || body.Version != serviceVersion() {
+		t.Fatalf("unexpected health response: %+v", body)
+	}
+}
+
 func TestListUsers(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	request := httptest.NewRequest(http.MethodGet, "/api/v1/users", nil)

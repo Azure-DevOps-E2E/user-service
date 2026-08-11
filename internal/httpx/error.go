@@ -3,7 +3,7 @@ package httpx
 import (
 	"github.com/gin-gonic/gin"
 
-	"polyglot-shop/user-service/internal/requestid"
+	"nexuscart/user-service/internal/requestid"
 )
 
 type ErrorBody struct {

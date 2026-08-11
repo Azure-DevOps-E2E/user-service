@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"polyglot-shop/user-service/internal/httpx"
+	"nexuscart/user-service/internal/httpx"
 )
 
 type Handler struct {
