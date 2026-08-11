@@ -1,0 +1,11 @@
+package user
+
+type User struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+
+type ListResponse struct {
+	Items []User `json:"items"`
+}
