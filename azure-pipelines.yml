@@ -28,9 +28,9 @@ stages:
     containerRegistry: acrLoginServer
     qualitySteps:
     - task: GoTool@0
-      displayName: 'Use Go 1.26.5'
+      displayName: 'Use Go 1.26.6'
       inputs:
-        version: '1.26.5'
+        version: '1.26.6'
 
     - bash: |
         set -euo pipefail
