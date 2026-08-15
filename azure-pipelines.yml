@@ -27,14 +27,12 @@ stages:
     dockerfilePath: Dockerfile
     containerRegistry: acrLoginServer
     qualitySteps:
-    - task: GoTool@0
-      displayName: 'Use Go 1.26.6'
-      inputs:
-        version: '1.26.6'
-
-    - bash: |
-        set -euo pipefail
-        go vet ./...
-        go test ./...
-        go build ./...
-      displayName: 'Vet, test, and build'
+    - template: pipelines/templates/steps/checkout.yml@configTemplates
+    - template: pipelines/templates/steps/go/setup.yml@configTemplates
+    - template: pipelines/templates/steps/go/test.yml@configTemplates
+    - template: pipelines/templates/steps/go/verify.yml@configTemplates
+    - template: pipelines/templates/steps/reports.yml@configTemplates
+    - template: pipelines/templates/steps/qodana.yml@configTemplates
+      parameters:
+        linter: qodana-go
+        requiresToken: true

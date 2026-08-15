@@ -2,6 +2,8 @@
 *.log
 *.test
 coverage.out
+coverage/
+reports/
 bin/
 .idea/
 .vscode/
