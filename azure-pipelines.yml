@@ -70,12 +70,12 @@ extends:
           inputs:
             version: '$(goVersion)'
 
-        - template: pipelines/templates/steps/go/test.yml@templates
+        - template: steps/go/test.yml@templates
           parameters:
             testResultsFile: reports/test-results.xml
             coverageReportFile: coverage/cobertura-coverage.xml
 
-        - template: pipelines/templates/steps/go/verify.yml@templates
+        - template: steps/go/verify.yml@templates
 
         - task: PublishTestResults@2
           displayName: 'Publish test report'
@@ -123,7 +123,7 @@ extends:
               $(candidateTag)
               dev
 
-        - template: pipelines/templates/steps/container/scan.yml@templates
+        - template: steps/container/scan.yml@templates
           parameters:
             scanImage: '$(acrLoginServer)/$(imageRepository):$(candidateTag)'
             trivyVersion: '$(trivyVersion)'
@@ -227,7 +227,7 @@ extends:
           persistCredentials: true
           displayName: 'Checkout full Git history'
 
-        - template: pipelines/templates/steps/container/resolve-candidate.yml@templates
+        - template: steps/container/resolve-candidate.yml@templates
 
     - stage: PromoteImage
       displayName: 'Promote image - $(serviceName)'
@@ -248,7 +248,7 @@ extends:
             command: login
             containerRegistry: '$(containerRegistryServiceConnection)'
 
-        - template: pipelines/templates/steps/container/promote.yml@templates
+        - template: steps/container/promote.yml@templates
           parameters:
             registry: '$(acrLoginServer)'
             repository: '$(imageRepository)'
