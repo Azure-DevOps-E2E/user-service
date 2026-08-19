@@ -20,6 +20,7 @@ resources:
     ref: refs/heads/main
 
 variables:
+- group: user-service
 - name: serviceName
   value: 'user-service'
 - name: goVersion
@@ -44,36 +45,34 @@ extends:
         steps:
         - checkout: self
           clean: true
-          fetchDepth: 1
+          fetchDepth: 0
           displayName: 'Checkout source code'
 
-        # Host Go setup is kept commented for rollback. Quality now runs in Docker.
-        # - task: GoTool@0
-        #   displayName: 'Use Go $(goVersion)'
-        #   inputs:
-        #     version: '$(goVersion)'
-        #
-        # - template: steps/go/test.yml@templates
-        #   parameters:
-        #     testResultsFile: reports/test-results.xml
-        #     coverageReportFile: coverage/cobertura-coverage.xml
-        #
-        # - template: steps/go/verify.yml@templates
+        - template: steps/detect-changes.yml@templates
+          parameters:
+            targetBranch: 'main'
+
+        - template: steps/security-scan.yml@templates
+          parameters:
+            runtime: go
+          condition: and(succeeded(), eq(variables['detect.skipHeavyCI'], 'false'))
 
         - template: steps/container/prepare-build-image.yml@templates
           parameters:
             runtime: go
             version: '$(goVersion)'
+          condition: and(succeeded(), eq(variables['detect.skipHeavyCI'], 'false'))
 
         - template: steps/go/quality-container.yml@templates
           parameters:
             cacheKey: '$(serviceName)-go$(goVersion)'
             testResultsFile: reports/test-results.xml
             coverageReportFile: coverage/cobertura-coverage.xml
+          condition: and(succeeded(), eq(variables['detect.skipHeavyCI'], 'false'))
 
         - task: PublishTestResults@2
           displayName: 'Publish test report'
-          condition: succeededOrFailed()
+          condition: and(succeededOrFailed(), eq(variables['detect.skipHeavyCI'], 'false'))
           inputs:
             testResultsFormat: JUnit
             testResultsFiles: '$(testResultsFile)'
@@ -86,15 +85,26 @@ extends:
 
         - task: UseDotNet@2
           displayName: 'Use .NET SDK for coverage publisher'
-          condition: succeededOrFailed()
+          condition: and(succeededOrFailed(), eq(variables['detect.skipHeavyCI'], 'false'))
           inputs:
             packageType: sdk
             version: '8.x'
 
         - task: PublishCodeCoverageResults@2
           displayName: 'Publish coverage report'
-          condition: succeededOrFailed()
+          condition: and(succeededOrFailed(), eq(variables['detect.skipHeavyCI'], 'false'))
           inputs:
             summaryFileLocation: '$(coverageSummaryFile)'
             pathToSources: '$(Build.SourcesDirectory)'
             failIfCoverageEmpty: true
+
+        - template: steps/qodana-scan.yml@templates
+          parameters:
+            linter: 'jetbrains/qodana-go'
+          condition: and(succeeded(), eq(variables['detect.skipHeavyCI'], 'false'))
+
+        - template: steps/qodana-quality-gate.yml@templates
+          parameters:
+            failThreshold: 0
+            failOnCritical: true
+          condition: and(succeeded(), eq(variables['detect.skipHeavyCI'], 'false'))
