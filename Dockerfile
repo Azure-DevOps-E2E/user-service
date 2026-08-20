@@ -11,7 +11,9 @@ RUN CGO_ENABLED=0 GOOS=linux go test ./... \
 FROM alpine:3.24
 
 ARG APP_VERSION=1.0.0
-ENV APP_VERSION=${APP_VERSION}
+ARG APP_IMAGE_TAG=1.0.0
+ENV APP_VERSION=${APP_VERSION} \
+    APP_IMAGE_TAG=${APP_IMAGE_TAG}
 
 RUN apk add --no-cache ca-certificates \
     && addgroup -S app \
