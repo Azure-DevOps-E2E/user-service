@@ -17,6 +17,13 @@ func (s *fakeServer) Run(args ...string) error {
 	return s.err
 }
 
+func TestDefaultNewServerReturnsRunner(t *testing.T) {
+	server := defaultNewServer()
+	if server == nil {
+		t.Fatal("expected defaultNewServer to return a server runner")
+	}
+}
+
 func TestRunUsesDefaultPortWhenUnset(t *testing.T) {
 	originalNewServer := newServer
 	t.Cleanup(func() {
