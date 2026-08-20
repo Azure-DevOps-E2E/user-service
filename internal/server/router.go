@@ -20,6 +20,13 @@ func serviceVersion() string {
 	return defaultServiceVersion
 }
 
+func serviceImageTag() string {
+	if imageTag := strings.TrimSpace(os.Getenv("APP_IMAGE_TAG")); imageTag != "" {
+		return imageTag
+	}
+	return serviceVersion()
+}
+
 func New() *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Logger(), gin.Recovery(), requestid.Middleware())
@@ -29,9 +36,10 @@ func New() *gin.Engine {
 
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"status":  "UP",
-			"service": "user-service",
-			"version": serviceVersion(),
+			"status":   "UP",
+			"service":  "user-service",
+			"version":  serviceVersion(),
+			"imageTag": serviceImageTag(),
 		})
 	})
 

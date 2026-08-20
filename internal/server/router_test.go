@@ -21,14 +21,15 @@ func TestHealthIncludesServiceVersion(t *testing.T) {
 	}
 
 	var body struct {
-		Status  string `json:"status"`
-		Service string `json:"service"`
-		Version string `json:"version"`
+		Status   string `json:"status"`
+		Service  string `json:"service"`
+		Version  string `json:"version"`
+		ImageTag string `json:"imageTag"`
 	}
 	if err := json.Unmarshal(response.Body.Bytes(), &body); err != nil {
 		t.Fatalf("decode response: %v", err)
 	}
-	if body.Status != "UP" || body.Service != "user-service" || body.Version != serviceVersion() {
+	if body.Status != "UP" || body.Service != "user-service" || body.Version != serviceVersion() || body.ImageTag != serviceImageTag() {
 		t.Fatalf("unexpected health response: %+v", body)
 	}
 }
