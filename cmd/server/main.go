@@ -8,7 +8,7 @@ import (
 )
 
 type serverRunner interface {
-	Run(string) error
+	Run(...string) error
 }
 
 var newServer = func() serverRunner {

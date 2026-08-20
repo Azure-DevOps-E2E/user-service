@@ -7,8 +7,10 @@ type fakeServer struct {
 	err  error
 }
 
-func (s *fakeServer) Run(addr string) error {
-	s.addr = addr
+func (s *fakeServer) Run(args ...string) error {
+	if len(args) > 0 {
+		s.addr = args[0]
+	}
 	return s.err
 }
 
