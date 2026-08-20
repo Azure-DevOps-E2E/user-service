@@ -13,6 +13,8 @@ const (
 	contextKey = "requestId"
 )
 
+var randRead = rand.Read
+
 // Middleware accepts a request ID from the gateway or creates one for direct calls.
 func Middleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -38,7 +40,7 @@ func From(c *gin.Context) string {
 
 func generate() string {
 	buffer := make([]byte, 8)
-	if _, err := rand.Read(buffer); err == nil {
+	if _, err := randRead(buffer); err == nil {
 		return hex.EncodeToString(buffer)
 	}
 	return time.Now().UTC().Format("20060102150405.000000000")
