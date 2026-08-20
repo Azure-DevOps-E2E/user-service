@@ -1,9 +1,11 @@
 package requestid
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -71,5 +73,26 @@ func TestFromReturnsUnknownForMissingOrInvalidValue(t *testing.T) {
 	c.Set(contextKey, 123)
 	if got := From(c); got != "unknown" {
 		t.Fatalf("expected unknown for invalid request ID type, got %q", got)
+	}
+}
+
+func TestGenerateFallsBackToTimestampWhenRandFails(t *testing.T) {
+	originalRead := randRead
+	originalNow := utcNow
+	t.Cleanup(func() {
+		randRead = originalRead
+		utcNow = originalNow
+	})
+
+	randRead = func([]byte) (int, error) {
+		return 0, errors.New("rand failure")
+	}
+	fixed := time.Date(2026, time.August, 20, 11, 22, 33, 444555666, time.UTC)
+	utcNow = func() time.Time {
+		return fixed
+	}
+
+	if got := generate(); got != fixed.Format("20060102150405.000000000") {
+		t.Fatalf("expected timestamp fallback %q, got %q", fixed.Format("20060102150405.000000000"), got)
 	}
 }
