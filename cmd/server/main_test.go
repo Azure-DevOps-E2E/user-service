@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 type fakeServer struct {
 	addr string
@@ -59,16 +62,54 @@ func TestMainCallsExecute(t *testing.T) {
 	t.Cleanup(func() {
 		execute = originalExecute
 	})
+	originalFatalf := fatalf
+	t.Cleanup(func() {
+		fatalf = originalFatalf
+	})
 
 	called := false
 	execute = func() error {
 		called = true
 		return nil
 	}
+	fatalf = func(string, ...any) {
+		t.Fatal("fatalf should not be called when execute succeeds")
+	}
 
 	main()
 
 	if !called {
 		t.Fatal("expected main to call execute")
+	}
+}
+
+func TestMainCallsFatalfOnExecuteError(t *testing.T) {
+	originalExecute := execute
+	t.Cleanup(func() {
+		execute = originalExecute
+	})
+	originalFatalf := fatalf
+	t.Cleanup(func() {
+		fatalf = originalFatalf
+	})
+
+	called := false
+	execute = func() error {
+		return errors.New("boom")
+	}
+	fatalf = func(format string, args ...any) {
+		called = true
+		if format != "user-service stopped: %v" {
+			t.Fatalf("unexpected fatal format: %q", format)
+		}
+		if len(args) != 1 || args[0].(error).Error() != "boom" {
+			t.Fatalf("unexpected fatal args: %#v", args)
+		}
+	}
+
+	main()
+
+	if !called {
+		t.Fatal("expected main to call fatalf on execute error")
 	}
 }

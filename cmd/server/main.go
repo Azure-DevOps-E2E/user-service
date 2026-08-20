@@ -11,15 +11,17 @@ type serverRunner interface {
 	Run(...string) error
 }
 
-var newServer = func() serverRunner {
+func defaultNewServer() serverRunner {
 	return server.New()
 }
 
+var newServer = defaultNewServer
+var fatalf = log.Fatalf
 var execute = run
 
 func main() {
 	if err := execute(); err != nil {
-		log.Fatalf("user-service stopped: %v", err)
+		fatalf("user-service stopped: %v", err)
 	}
 }
 
